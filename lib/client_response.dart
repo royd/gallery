@@ -1,9 +1,11 @@
 class ClientResponse<T> {
   ClientResponse({
     this.result,
-    required this.statusCode,
+    this.statusCode,
+    this.exception,
   });
 
   final T? result;
-  final int statusCode;
+  final int? statusCode;
+  final Exception? exception;
 }

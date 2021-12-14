@@ -3,15 +3,17 @@ import 'dart:io';
 
 import 'package:gallery/client_response.dart';
 import 'package:gallery/dtos/search_images_response_dto.dart';
+import 'package:simple_logger/simple_logger.dart';
 
 class ImageClient {
   static const _apiKey =
       '563492ad6f91700001000001b131fef8abeb4a89969d03bb5effdbbe';
   final _httpClient = HttpClient();
+  final _log = SimpleLogger();
 
   ///
   /// Search for images.
-  /// 
+  ///
   /// [text] Search text.
   /// [page] Zero-based index of the page.
   /// [perPage] Max results per result page.
@@ -31,20 +33,34 @@ class ImageClient {
       queryParameters: queryParameters,
     );
 
-    final request = await _httpClient.getUrl(uri);
-    request.headers.add('Authorization', _apiKey);
-
-    final response = await request.close();
-
+    int? statusCode;
     SearchImagesResponseDto? result;
 
-    if (response.statusCode == HttpStatus.ok) {
-      final json = await response.transform(utf8.decoder).join();
-      result = SearchImagesResponseDto.fromJson(jsonDecode(json));
+    try {
+      final request = await _httpClient.getUrl(uri);
+      request.headers.add('Authorization', _apiKey);
+
+      final response = await request.close();
+
+      statusCode = response.statusCode;
+
+      if (response.statusCode == HttpStatus.ok) {
+        final json = await response.transform(utf8.decoder).join();
+        result = SearchImagesResponseDto.fromJson(jsonDecode(json));
+      }
+
+      if (result == null) {
+        _log.warning(
+            'Failed to retrieve images. Status code: ${response.statusCode}');
+      }
+    } on SocketException catch (e) {
+      _log.warning('Failed to retrieve images. SocketException: ${e.message}');
+    } on Exception catch (e) {
+      _log.warning('Failed to retrieve images. Exception: ${e.toString()}');
     }
 
     return ClientResponse(
-      statusCode: response.statusCode,
+      statusCode: statusCode,
       result: result,
     );
   }
