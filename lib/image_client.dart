@@ -30,6 +30,8 @@ class ImageClient {
       'per_page': perPage.toString(),
     };
 
+    _log.info('Requesting "$text" page $page');
+
     final uri = Uri.parse('https://api.pexels.com/v1/search').replace(
       queryParameters: queryParameters,
     );
