@@ -8,7 +8,8 @@ import 'package:simple_logger/simple_logger.dart';
 class ImageClient {
   static const _apiKey =
       '563492ad6f91700001000001b131fef8abeb4a89969d03bb5effdbbe';
-  final _httpClient = HttpClient();
+  final _httpClient = HttpClient()
+    ..connectionTimeout = const Duration(seconds: 10);
   final _log = SimpleLogger();
 
   ///
